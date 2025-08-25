@@ -1,0 +1,81 @@
+#!/usr/bin/env python
+#
+# Copyright 2007 Google Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+from google.appengine.ext import webapp
+from google.appengine.ext.webapp import util
+import datetime
+
+
+class MainHandler(webapp.RequestHandler):
+    def get(self):
+        # Show the form
+        self.response.out.write("""
+            <html>
+
+		<head>
+<link  rel="icon" href="https://static.vecteezy.com/system/resources/previews/006/852/804/original/abstract-blue-background-simple-design-for-your-website-free-vector.jpg">
+		</head>
+
+
+               <center>
+            <body>
+                <h2>Age Calculator</h2>
+                <form method="post">
+                    Enter your birth date:<br>
+                    <input type="date" name="birthdate" required><br><br>
+                    <input type="submit" value="Calculate Age">
+                </form>
+            </body>
+</center>
+            </html>
+        """)
+
+    def post(self):
+        # Get the birthdate input from the form
+        birthdate_str = self.request.get('birthdate')
+        try:
+            birthdate = datetime.datetime.strptime(birthdate_str, "%Y-%m-%d").date()
+            today = datetime.date.today()
+            age = today.year - birthdate.year - (
+                (today.month, today.day) < (birthdate.month, birthdate.day)
+            )
+            self.response.out.write("""
+                <html>
+                <body>
+                    <h2>Your age is: {}</h2>
+                    <a href="/">Calculate again</a>
+                </body>
+                </html>
+            """.format(age))
+        except ValueError:
+            self.response.out.write("""
+                <html>
+                <body>
+                    <h2>Error: Invalid date format. Please enter a valid birth date.</h2>
+                    <a href="/">Try again</a>
+                </body>
+                </html>
+            """)
+
+
+def main():
+    application = webapp.WSGIApplication([('/', MainHandler)], debug=True)
+    util.run_wsgi_app(application)
+
+
+if __name__ == '__main__':
+    main()
